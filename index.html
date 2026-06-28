@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Industrial IoT Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#0f172a;color:#fff;padding:20px}
+h1{text-align:center;margin-bottom:25px}
+
+.sensor-container{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    max-width:1800px;
+    margin:0 auto 30px;
+}
+
+.alert-container{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    max-width:1800px;
+    margin:0 auto 30px;
+}
+
+
+.sensor-card,.card{background:#16213e;border-radius:15px;padding:20px;text-align:center}
+.sensor-title{font-size:20px;margin-bottom:10px}
+.gauge{width:220px;margin:auto;position:relative}
+.gauge svg{width:100%}
+.gauge-value{position:absolute;width:100%;bottom:15px;text-align:center;font-size:28px;font-weight:bold}
+.gauge-label{margin-top:10px;color:#cbd5e1}
+.controls{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;margin-bottom:30px}
+.controls button{width:150px;padding:12px;border:none;border-radius:10px;background:#2563eb;color:white;cursor:pointer}
+.container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:1200px;margin:auto}
+.led-circle{width:60px;height:60px;border-radius:50%;background:#333;margin:15px auto}
+.led-circle.on{background:#22c55e;box-shadow:0 0 20px #22c55e}
+.card button{width:100%;padding:10px;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer}
+.status{margin-top:10px;color:#cbd5e1}
+.alert-led{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:#333;
+    margin:20px auto;
+    transition:0.3s;
+}
+
+.alert-led.alarm{
+    background:#ef4444;
+    box-shadow:0 0 25px #ef4444;
+    animation:blink 0.5s infinite;
+}
+
+@keyframes blink{
+    50%{
+        opacity:0.3;
+    }
+}
+@media(max-width:900px){
+
+    .sensor-container{
+        grid-template-columns:1fr;
+    }
+
+    .alert-container{
+        grid-template-columns:1fr;
+    }
+
+    .gauge{
+        width:150px;
+    }
+}
+@media(max-width:768px){.container{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>Erovoutika IoT Dashboard</h1>
+
+<div class="sensor-container">
+<div class="sensor-card">
+<div class="sensor-title">🌡 Temperature</div>
+<div class="gauge">
+<svg viewBox="0 0 200 120">
+<path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#334155" stroke-width="16"/>
+<path id="tempArc" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#22c55e" stroke-width="16" stroke-linecap="round" stroke-dasharray="251"/>
+</svg>
+<div class="gauge-value" id="tempValue">28°C</div>
+</div>
+<div class="gauge-label">Temperature Sensor</div>
+</div>
+
+<div class="sensor-card">
+<div class="sensor-title">💧 Humidity</div>
+<div class="gauge">
+<svg viewBox="0 0 200 120">
+<path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#334155" stroke-width="16"/>
+<path id="humArc" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#3b82f6" stroke-width="16" stroke-linecap="round" stroke-dasharray="251"/>
+</svg>
+<div class="gauge-value" id="humValue">65%</div>
+</div>
+<div class="gauge-label">Humidity Sensor</div>
+</div>
+
+<div class="sensor-card">
+<div class="sensor-title">🛢 Gas Level</div>
+<div class="gauge">
+<svg viewBox="0 0 200 120">
+<path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#334155" stroke-width="16"/>
+<path id="gasArc" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="round" stroke-dasharray="251"/>
+</svg>
+<div class="gauge-value" id="gasValue">250</div>
+</div>
+<div class="gauge-label">MQ Gas Sensor (PPM)</div>
+</div>
+
+
+<div class="sensor-card">
+
+    <div class="sensor-title">🔥 Flame Level</div>
+
+    <div class="gauge">
+
+        <svg viewBox="0 0 200 120">
+
+            <path
+                d="M20 100 A80 80 0 0 1 180 100"
+                fill="none"
+                stroke="#334155"
+                stroke-width="16"/>
+
+            <path
+                id="flameArc"
+                d="M20 100 A80 80 0 0 1 180 100"
+                fill="none"
+                stroke="#f97316"
+                stroke-width="16"
+                stroke-linecap="round"
+                stroke-dasharray="251"/>
+
+        </svg>
+
+        <div class="gauge-value" id="flameValue">
+            0%
+        </div>
+
+    </div>
+
+    <div class="gauge-label">
+        Flame Sensor
+    </div>
+
+</div>
+</div>
+
+
+<div class="alert-container">
+
+    <div class="sensor-card">
+        <div class="sensor-title">🚨 Gas Alert</div>
+        <div id="alertLed" class="alert-led"></div>
+        <div id="alertText" class="gauge-label">Safe</div>
+    </div>
+
+    <div class="sensor-card">
+        <div class="sensor-title">🔥 Flame Alert</div>
+        <div id="flameAlertLed" class="alert-led"></div>
+        <div id="flameAlertText" class="gauge-label">No Flame</div>
+    </div>
+
+    <div class="sensor-card">
+        <div class="sensor-title">Place Holder</div>
+        <div class="alert-led"></div>
+        <div class="gauge-label">Value</div>
+    </div>
+
+    <div class="sensor-card">
+        <div class="sensor-title">Place Holder</div>
+        <div class="alert-led"></div>
+        <div class="gauge-label">Value</div>
+    </div>
+
+    <div class = "sensor-card">
+        <div class="sensor-title">Place Holder</div>
+        <div class="alert-led"></div>
+        <div class="gauge-label">Value</div>
+    </div>
+
+</div>
+
+
+<div class="controls">
+<button onclick="turnAllOn()">Turn All ON</button>
+<button onclick="turnAllOff()">Turn All OFF</button>
+</div>
+
+<div class="container" id="ledContainer"></div>
+
+<script>
+function updateGauge(id,percent){
+ const c=251;
+ document.getElementById(id).style.strokeDashoffset=c-(percent/100)*c;
+}
+
+setInterval(() => {
+  const temp  = Math.floor(Math.random() * 15) + 20;
+  const hum   = Math.floor(Math.random() * 40) + 40;
+  const gas   = Math.floor(Math.random() * 500) + 100;
+  const flame = Math.floor(Math.random() * 100);
+
+  tempValue.innerText  = temp + "°C";
+  humValue.innerText   = hum + "%";
+  gasValue.innerText   = gas;
+  flameValue.innerText = flame + "%";
+
+  updateGauge("tempArc",  temp * 2.5);
+  updateGauge("humArc",   hum);
+  updateGauge("gasArc",   Math.min(gas / 10, 100));
+  updateGauge("flameArc", flame);
+
+  // GAS ALERT
+  const gasArc   = document.getElementById("gasArc");
+  const alertLed  = document.getElementById("alertLed");
+  const alertText = document.getElementById("alertText");
+
+  if (gas < 300) {
+    gasArc.style.stroke = "#22c55e";
+    alertLed.classList.remove("alarm");
+    alertText.innerText = "Safe";
+  } else if (gas < 500) {
+    gasArc.style.stroke = "#facc15";
+    alertLed.classList.remove("alarm");
+    alertText.innerText = "Warning";
+  } else {
+    gasArc.style.stroke = "#ef4444";
+    alertLed.classList.add("alarm");
+    alertText.innerText = "DANGER! Gas Level High";
+  }
+
+  // FLAME ALERT
+  const flameArc       = document.getElementById("flameArc");
+  const flameAlertLed  = document.getElementById("flameAlertLed");
+  const flameAlertText = document.getElementById("flameAlertText");
+
+  if (flame < 30) {
+    flameArc.style.stroke = "#22c55e";
+    flameAlertLed.classList.remove("alarm");
+    flameAlertText.innerText = "No Flame";
+  } else if (flame < 70) {
+    flameArc.style.stroke = "#facc15";
+    flameAlertLed.classList.remove("alarm");
+    flameAlertText.innerText = "Flame Detected";
+  } else {
+    flameArc.style.stroke = "#ef4444";
+    flameAlertLed.classList.add("alarm");
+    flameAlertText.innerText = "FIRE ALERT!";
+  }
+
+}, 1000);
+const container=document.getElementById("ledContainer");
+const leds=[];
+
+for(let i=1;i<=4;i++){
+ const card=document.createElement("div");
+ card.className="card";
+ card.innerHTML=`<h3>LED ${i}</h3>
+ <div class="led-circle"></div>
+ <button>Turn LED ${i} ON</button>
+ <p class="status">LED ${i} is currently OFF</p>`;
+ container.appendChild(card);
+
+ const led={state:false,circle:card.querySelector(".led-circle"),button:card.querySelector("button"),status:card.querySelector(".status")};
+ leds.push(led);
+ led.button.onclick=()=>toggleLed(i-1);
+}
+
+function toggleLed(i){leds[i].state=!leds[i].state;updateLed(i);}
+function updateLed(i){
+ const led=leds[i];
+ if(led.state){
+  led.circle.classList.add("on");
+  led.button.innerText=`Turn LED ${i+1} OFF`;
+  led.status.innerText=`LED ${i+1} is currently ON`;
+ } else {
+  led.circle.classList.remove("on");
+  led.button.innerText=`Turn LED ${i+1} ON`;
+  led.status.innerText=`LED ${i+1} is currently OFF`;
+ }
+}
+function turnAllOn(){leds.forEach((l,i)=>{l.state=true;updateLed(i);});}
+function turnAllOff(){leds.forEach((l,i)=>{l.state=false;updateLed(i);});}
+</script>
+</body>
+</html>
