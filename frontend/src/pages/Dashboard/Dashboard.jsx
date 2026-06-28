@@ -8,6 +8,7 @@ function Dashboard() {
   const humidity = 60;
   const gas = 250;
   const flame = 10;
+  const light = 300;
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-5">
@@ -53,7 +54,7 @@ function Dashboard() {
         />
 
         <SensorCard
-          title="Placeholder"
+          title="💡 Placeholder"
           value={0}
           max={100}
           unit=""
@@ -62,12 +63,12 @@ function Dashboard() {
         />
 
         <SensorCard
-          title="Placeholder"
-          value={0}
-          max={100}
-          unit=""
-          color="#64748b"
-          label="Reserved Sensor"
+          title="💡 Light"
+          value={light}
+          max={1000}
+          unit=" Lux"
+          color="#FDF8D8"
+          label="BH1750"
         />
 
       </div>
