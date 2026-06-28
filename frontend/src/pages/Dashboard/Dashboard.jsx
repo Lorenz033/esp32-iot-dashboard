@@ -2,6 +2,8 @@ import { useState } from "react";
 import Title from "../../components/dashboard/Title";
 import SensorCard from "../../components/dashboard/SensorCard";
 import LedCard from "../../components/dashboard/LedCard";
+import AlertCard from "../../components/dashboard/AlertCard";
+import DoorCard from "../../components/dashboard/DoorCard";
 
 function Dashboard() {
 
@@ -13,13 +15,29 @@ function Dashboard() {
   const light = 300;
   const water = 50;
 
-  // Mock LED states
+  // Mock alert levels
+  const gasLevel = "safe";
+  const flameLevel = "danger";
+  const waterLevel = "warning";
+  const lightLevel = "safe";
+  const temperatureLevel = "safe";
+  const humidityLevel = "warning";
+
+  // LED States
   const [leds, setLeds] = useState([
     false,
     false,
     false,
     false,
   ]);
+
+  // Door State
+  const [doorOpen, setDoorOpen] = useState(false);
+
+  function toggleDoor() {
+    setDoorOpen(!doorOpen);
+  }
+
 
   function toggleLed(index) {
     const updated = [...leds];
@@ -28,7 +46,6 @@ function Dashboard() {
   }
 
   function toggleAllLeds() {
-
     const allOn = leds.every((led) => led);
 
     if (allOn) {
@@ -36,7 +53,6 @@ function Dashboard() {
     } else {
       setLeds([true, true, true, true]);
     }
-
   }
 
   return (
@@ -103,27 +119,94 @@ function Dashboard() {
 
       </div>
 
-      {/* Master LED Control */}
-      <div className="flex justify-center mb-8">
+      {/* Alert Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-[1800px] mx-auto mb-8">
 
-        <div className="bg-slate-800 rounded-2xl p-6 shadow-lg w-full max-w-md text-center">
+        <AlertCard
+          title="🚨 Gas Alert"
+          level={gasLevel}
+        />
 
-          <h2 className="text-2xl font-bold mb-4">
-            Master LED Control
-          </h2>
+        <AlertCard
+          title="🔥 Flame Alert"
+          level={flameLevel}
+        />
 
-          <button
-            onClick={toggleAllLeds}
-            className="w-full bg-blue-600 hover:bg-blue-700 transition duration-300 rounded-xl py-3 text-lg font-semibold"
-          >
-            {leds.every((led) => led)
-              ? "Turn All OFF"
-              : "Turn All ON"}
-          </button>
+        <AlertCard
+          title="🌊 Water Alert"
+          level={waterLevel}
+        />
 
-        </div>
+        <AlertCard
+          title="💡 Light Alert"
+          level={lightLevel}
+        />
+
+        <AlertCard
+          title="🌡 Temperature Alert"
+          level={temperatureLevel}
+        />
+
+        <AlertCard
+          title="💧 Humidity Alert"
+          level={humidityLevel}
+        />
 
       </div>
+
+        {/* Controls */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-[900px] mx-auto mb-8">
+
+      {/* Master LED Control */}
+      <div className="bg-slate-800 rounded-2xl p-6 shadow-lg text-center">
+
+        <h2 className="text-2xl font-bold mb-4">
+          💡 Master LED Control
+        </h2>
+
+        <button
+          onClick={toggleAllLeds}
+          className="w-full bg-blue-600 hover:bg-blue-700 transition duration-300 rounded-xl py-3 text-lg font-semibold"
+        >
+          {leds.every((led) => led)
+            ? "Turn All OFF"
+            : "Turn All ON"}
+        </button>
+
+      </div>
+
+      {/* Door Control */}
+      <div className="bg-slate-800 rounded-2xl p-6 shadow-lg text-center">
+
+        <h2 className="text-2xl font-bold mb-4">
+          🚪 Door Control
+        </h2>
+
+        <button
+          onClick={toggleDoor}
+          className={`w-full rounded-xl py-3 text-lg font-semibold transition duration-300 ${
+            doorOpen
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
+        >
+          {doorOpen ? "Close Door" : "Open Door"}
+        </button>
+
+        <p className="mt-4 text-lg">
+          Status:
+          <span
+            className={`ml-2 font-bold ${
+              doorOpen ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            {doorOpen ? "OPEN" : "CLOSED"}
+          </span>
+        </p>
+
+      </div>
+
+    </div>
 
       {/* LED Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5 max-w-[1800px] mx-auto">
@@ -153,8 +236,11 @@ function Dashboard() {
         />
 
       </div>
+        
 
     </div>
+
+  
   );
 }
 
